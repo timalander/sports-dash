@@ -15,10 +15,14 @@ function parseGameData(rawData){
 			startTime : game.startTime,
 			location : game.location,
 			homeTeam : {
-				name : game.home.nameRaw
+				name : game.home.nameRaw,
+				score : game.home.currentScore,
+				color : game.home.color
 			},
 			awayTeam : {
-				name : game.away.nameRaw
+				name : game.away.nameRaw,
+				score : game.away.currentScore,
+				color : game.away.color
 			}
 		}
 	})
