@@ -4,6 +4,7 @@
       <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 
       <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
+      <link href='https://fonts.googleapis.com/css?family=Share+Tech+Mono' rel='stylesheet' type='text/css'>
 
       <!-- Latest compiled and minified CSS -->
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -20,38 +21,80 @@
    <div class="container">
       <div ng-controller="ListController">
          <nav class="navbar navbar-default navbar-fixed-top">
-            <div class="container">
+            <div class="container search-box">
                <input ng-model="search" type="text" class="form-control" placeholder="Search">
             </div>
          </nav>
-         <div ng-repeat="game in games | filter:search" class="panel panel-default">
-            <div class="panel-heading">
+         <div class="well">
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+               <a ng-click="toggleFilter('isLive')" type="button" ng-class="{'btn-success' : gameStateFilter['isLive']}" class="btn btn-default">Live</a>
+               <a ng-click="toggleFilter('isFinal')" type="button" ng-class="{'btn-success' : gameStateFilter['isFinal']}" class="btn btn-default">Final</a>
+               <a ng-click="toggleFilter('isUpcoming')" type="button" ng-class="{'btn-success' : gameStateFilter['isUpcoming']}" class="btn btn-default">Upcoming</a>
+            </div>
+         </div>
+         <div ng-repeat="game in games | filter:search | filter:gameStateFilter" class="panel panel-default">
+            <div ng-if="game.isUpcoming"class="panel-heading">
                {{game.startTime}}
+            </div>
+            <div ng-if="game.isLive"class="panel-heading">
+               LIVE
+            </div>
+            <div ng-if="game.isFinal"class="panel-heading">
+               FINAL
             </div>
             <div class="panel-body">
                <div class="row">
-                  <div class="col-xs-6 team-container" style="background-color: {{game.awayTeam.color}}">
-                     <div class="team-name">{{game.awayTeam.name}}</div>
+                  <div ng-class="game.currentGameTime ?  'col-xs-5' : 'col-xs-6'" style="background-color: {{game.awayTeam.color}}">
+                     <div class="row">
+                        <div class="team-name col-xs-8">{{game.awayTeam.name}}</div>
+                        <div class="score col-xs-4">{{game.awayTeam.score}}</div>
+                     </div>
                   </div>
-                  <div class="col-xs-6 team-container" style="background-color: {{game.homeTeam.color}}">
-                     <div class="team-name">{{game.homeTeam.name}}</div>
+                  <div ng-if="game.currentGameTime" class="col-xs-2" style="background: -moz-linear-gradient(left, {{game.awayTeam.color}} 0%, {{game.awayTeam.color}} 50%, {{game.homeTeam.color}} 50%, {{game.homeTeam.color}} 50%, {{game.homeTeam.color}} 100%);background: -webkit-linear-gradient(left, {{game.awayTeam.color}} 0%,{{game.awayTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 100%);background: linear-gradient(to right, {{game.awayTeam.color}} 0%,{{game.awayTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 100%);">
+                      <div class="time-left">{{game.currentGameTime}}</div>
+                  </div>
+                  <div ng-class="game.currentGameTime ?  'col-xs-5' : 'col-xs-6'" style="background-color: {{game.homeTeam.color}}">
+                     <div class="row">
+                        <div class="score col-xs-4">{{game.homeTeam.score}}</div>
+                        <div class="team-name col-xs-8">{{game.homeTeam.name}}</div>
+                     </div>
                   </div>
                </div>
             </div>
          </div>
       </div>
    </div>
-
    <script>
       angular.module('myapp', [])
-      .controller('ListController', function($scope, $http) {
-         $http({
-            method: 'GET',
-            url: '/getgames'
-         }).then(function successCallback(response) {
-            $scope.games = response.data;
-         }, function errorCallback(response) {
-            alert('Shit broke: ' + response.data);
+      .factory('gameFactory', function($http) {
+         return {
+            getGameData : function() {
+               return $http({
+                  method: 'GET',
+                  url: '/getgames'
+               }).then(function successCallback(response) {
+                  return response.data;
+               }, function errorCallback(response) {
+                  alert('Shit broke: ' + response.data);
+               });
+            }
+         }
+      })
+      .controller('ListController', function($scope, gameFactory) {
+         gameFactory.getGameData().then( function(response) {
+            $scope.gameStateFilter = {};
+
+            $scope.toggleFilter = function(key) {
+               if (key in $scope.gameStateFilter) {
+                  delete $scope.gameStateFilter[key]
+               }
+               else {
+                  $scope.gameStateFilter = {};
+                  $scope.gameStateFilter[key] = true;
+               }
+            };
+
+            $scope.games = response;
          });
       });
    </script>
@@ -60,20 +103,35 @@
 </html>
 <style>
 body { padding-top: 70px; }
+.panel {
+   min-width: 60%;
+}
 .panel-body {
    padding-bottom: 0;
    padding-top: 0;
+   width: 100%;
 }
-.team-container {
+.team-name,
+.time-left,
+.score {
    height: 100px;
+   color: #fff;
+   font-family: 'Open Sans', sans-serif;
+   font-weight: 600;
+   font-size: 30px;
+   text-align: center;
    display: flex;
    align-items: center;
    justify-content: center;
 }
+.search-box {
+   padding-top: 7px;
+}
+.time-left {
+   font-weight: 400;
+   font-size: 24px;
+}
 .team-name {
-   color: #fff;
-   font-family: 'Open Sans', sans-serif;
-   font-weight: 600;
-   font-size: 20px;
+   font-weight: 400;
 }
 </style>

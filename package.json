@@ -1,12 +1,11 @@
 {
   "name"         : "sports-dash",
   "version"      : "0.0.1",
-  "description"  : "Scrape ESPN for CBB Scores",
+  "description"  : "Scrape NCAA.com for CBB Scores",
   "main"         : "server.js",
   "author"       : "Tim",
   "dependencies" : {
     "express"    : "latest",
-    "request"    : "latest",
-    "cheerio"    : "latest"
+    "request"    : "latest"
   }
 }

@@ -12,6 +12,9 @@ function parseGameData(rawData){
 		return {
 			id : game.id,
 			state : game.gameState,
+			isLive : game.gameState === 'live',
+			isFinal : game.gameState === 'final',
+			isUpcoming : game.gameState === 'isUpcoming',
 			startTime : game.startTime,
 			location : game.location,
 			homeTeam : {
@@ -23,7 +26,8 @@ function parseGameData(rawData){
 				name : game.away.nameRaw,
 				score : game.away.currentScore,
 				color : game.away.color
-			}
+			},
+			currentGameTime : game.timeclock
 		}
 	})
 }
