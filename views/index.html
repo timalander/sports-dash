@@ -3,6 +3,8 @@
    <head>
       <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 
+      <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
+
       <!-- Latest compiled and minified CSS -->
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
@@ -12,23 +14,27 @@
       <!-- Latest compiled and minified JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
-      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
    </head>
-   <body ng-app = "myapp">
+   <body ng-app="myapp">
    <div class="container">
-      <h1>Games:</h1>
-      <div ng-controller = "ListController">
-         <div ng-repeat="game in games" class="panel panel-default">
+      <div ng-controller="ListController">
+         <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+               <input ng-model="search" type="text" class="form-control" placeholder="Search">
+            </div>
+         </nav>
+         <div ng-repeat="game in games | filter:search" class="panel panel-default">
             <div class="panel-heading">
                {{game.startTime}}
             </div>
             <div class="panel-body">
                <div class="row">
-                  <div class="col-md-6" style="background-color: {{game.awayTeam.color}}">
-                     {{game.awayTeam.name}}
+                  <div class="col-xs-6 team-container" style="background-color: {{game.awayTeam.color}}">
+                     <div class="team-name">{{game.awayTeam.name}}</div>
                   </div>
-                  <div class="col-md-6" style="background-color: {{game.homeTeam.color}}">
-                  {{game.homeTeam.name}}
+                  <div class="col-xs-6 team-container" style="background-color: {{game.homeTeam.color}}">
+                     <div class="team-name">{{game.homeTeam.name}}</div>
                   </div>
                </div>
             </div>
@@ -37,15 +43,15 @@
    </div>
 
    <script>
-      angular.module("myapp", [])
-      .controller("ListController", function($scope, $http) {
+      angular.module('myapp', [])
+      .controller('ListController', function($scope, $http) {
          $http({
             method: 'GET',
             url: '/getgames'
          }).then(function successCallback(response) {
             $scope.games = response.data;
          }, function errorCallback(response) {
-            alert('Shit broke: ' + response);
+            alert('Shit broke: ' + response.data);
          });
       });
    </script>
@@ -53,4 +59,21 @@
    </body>
 </html>
 <style>
+body { padding-top: 70px; }
+.panel-body {
+   padding-bottom: 0;
+   padding-top: 0;
+}
+.team-container {
+   height: 100px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+.team-name {
+   color: #fff;
+   font-family: 'Open Sans', sans-serif;
+   font-weight: 600;
+   font-size: 20px;
+}
 </style>
