@@ -47,7 +47,7 @@
             </div>
             <div class="panel-body">
                <div class="row game-container">
-                  <div class="col-xs-6 team-background" style="background-color: {{game.awayTeam.color}}; background-image: url(http://i.turner.ncaa.com{{game.awayTeam.icon}});">
+                  <div class="col-xs-6 team-background" style="background: linear-gradient(rgba({{hexToRgb(game.awayTeam.color).full}},0.5),rgba({{hexToRgb(game.awayTeam.color).full}},0.5)) 500px 500px, url(http://i.turner.ncaa.com{{game.awayTeam.icon}}) no-repeat 10px center; background-color: {{game.awayTeam.color}};">
                      <div class="row">
                         <div class="team-name col-xs-8">{{game.awayTeam.name}}</div>
                         <div class="team-score col-xs-4">{{game.awayTeam.score}}</div>
@@ -56,7 +56,7 @@
                   <div  class="middle-game-info">
                      <div ng-if="game.isUpcoming || game.isFinal" class="at-sign">@</div>
                   </div>
-                  <div class="col-xs-6 team-background" style="background-color: {{game.homeTeam.color}}; background-image: url(http://i.turner.ncaa.com{{game.homeTeam.icon}});">
+                  <div class="col-xs-6 team-background" style="background: linear-gradient(rgba({{hexToRgb(game.homeTeam.color).full}},0.5),rgba({{hexToRgb(game.homeTeam.color).full}},0.5)) 500px 500px, url(http://i.turner.ncaa.com{{game.homeTeam.icon}}) no-repeat right 10px center; background-color: {{game.homeTeam.color}};">
                      <div class="row">
                         <div class="team-score col-xs-4">{{game.homeTeam.score}}</div>
                         <div class="team-name col-xs-8">{{game.homeTeam.name}}</div>
@@ -96,6 +96,16 @@
                $scope.gameStateFilter = {};
                $scope.gameStateFilter[key] = true;
             }
+         };
+
+         $scope.hexToRgb = function(hex) {
+             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+             return result ? {
+                 r: parseInt(result[1], 16),
+                 g: parseInt(result[2], 16),
+                 b: parseInt(result[3], 16),
+                 full: parseInt(result[1], 16) + ',' + parseInt(result[2], 16) + ',' + parseInt(result[3], 16)
+             } : null;
          };
          // $interval(function () {
          //    gameFactory.getGameData().then( function(response) {

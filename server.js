@@ -2,7 +2,7 @@ var app = require('express')(),
 	request = require('request'),
 	utils = require('./utils.js'),
 	path = require('path'),
-	url = 'http://data.ncaa.com/jsonp/scoreboard/basketball-men/d1/2016/02/26/scoreboard.html?callback=ncaa'
+	url = 'http://data.ncaa.com/jsonp/scoreboard/basketball-men/d1/2016/02/24/scoreboard.html?callback=ncaa'
 app.get('/getgames', function(req, res) {
 	request(url, function (error, response, body) {
 		if (!error) {
