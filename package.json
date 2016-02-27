@@ -6,6 +6,7 @@
   "author"       : "Tim",
   "dependencies" : {
     "express"    : "latest",
-    "request"    : "latest"
+    "request"    : "latest",
+    "node-cache" : "latest"
   }
 }

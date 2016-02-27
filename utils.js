@@ -1,3 +1,5 @@
+var request = require('request');
+
 function parseJSONP(rawJSONP, callbackName) {
 	var fn = new Function(callbackName, rawJSONP);
 	var parsedData;
@@ -5,7 +7,7 @@ function parseJSONP(rawJSONP, callbackName) {
 		parsedData = json.scoreboard[0];
 	})
 	return parsedData;
-}
+};
 
 function parseGameData(rawData){
 	return rawData.map(function(game) {
@@ -32,13 +34,45 @@ function parseGameData(rawData){
 			currentGameTime : parseGameTime(game.timeclock, game.currentPeriod)
 		}
 	})
-}
+};
 
 function parseGameTime(rawGameTime, currentPeriod) {
 	if (rawGameTime === '') {
 		return currentPeriod;
 	}
 	return rawGameTime;
-}
-exports.parseGameData = parseGameData,
-exports.parseJSONP = parseJSONP;
+};
+
+function getApiDateString(date) {
+	var y = date.getFullYear();
+	var m = date.getMonth() + 1;
+	if (m < 10) {
+		m = '0' + m;
+	}
+	var d = date.getDate();
+	if(d < 10) {
+		d = '0' + d;
+	}
+	return y + '/' + m + '/' + d;
+};
+
+function getGames(date, callback) {
+	var urlPrefix = 'http://data.ncaa.com/jsonp/scoreboard/basketball-men/d1/';
+	var urlSuffix = '/scoreboard.html?callback=ncaa';
+	var url = urlPrefix + getApiDateString(date) + urlSuffix;
+
+	request(url, function (error, response, body) {
+		if (!error) {
+			var json = parseJSONP(body, 'ncaa');
+			var games = parseGameData(json.games);
+      		callback(null, games);
+		} 
+		else {
+			callback(error);
+		}
+	});
+
+
+};
+
+exports.getGames = getGames;

@@ -1,19 +1,28 @@
 var app = require('express')(),
-	request = require('request'),
+    cache = require( "node-cache" ),
 	utils = require('./utils.js'),
-	path = require('path'),
-	url = 'http://data.ncaa.com/jsonp/scoreboard/basketball-men/d1/2016/02/24/scoreboard.html?callback=ncaa'
-app.get('/getgames', function(req, res) {
-	request(url, function (error, response, body) {
-		if (!error) {
-			var json = utils.parseJSONP(body, 'ncaa');
-			var games = utils.parseGameData(json.games);
-			
-			res.send(games);
-		} 
-		else {
-			console.log('We’ve encountered an error: ' + error);
-		}
+	path = require('path');
+
+var gameCache = new cache({ stdTTL: 30, checkperiod: 120 });
+
+app.get('/getgames/today', function(req, res) {
+	gameCache.get( "today", function(err, value){
+	  if( !err ){
+	    if(value == undefined){
+	    	console.log('[App] Making Request to NCAA CBB API');
+	    	utils.getGames(new Date(), function(error, games) {
+	    		res.send(games);
+				gameCache.set('today', games, function( err, success ){
+  					if(err){
+    					console.log('[APP] Problem setting cache');
+  					}
+				});
+	    	});
+	    }
+	    else{
+	      res.send(value);
+	    }
+	  }
 	});
 });
 app.get('/', function(req, res) {
