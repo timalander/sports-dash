@@ -1,9 +1,9 @@
 <!doctype html>
 <html>
    <head>
-      <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+      <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 
-      <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
+      <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
       <link href='https://fonts.googleapis.com/css?family=Share+Tech+Mono' rel='stylesheet' type='text/css'>
 
       <!-- Latest compiled and minified CSS -->
@@ -32,35 +32,39 @@
                <a ng-click="toggleFilter('isUpcoming')" type="button" ng-class="{'btn-success' : gameStateFilter['isUpcoming']}" class="btn btn-default">Upcoming</a>
             </div>
          </div>
-         <div ng-repeat="game in games | filter:search | filter:gameStateFilter" class="panel panel-default">
-            <div ng-if="game.isUpcoming"class="panel-heading">
-               {{game.startTime}}
+         <div class="row">
+         <div ng-repeat="game in games | filter:search | filter:gameStateFilter" class="panel panel-default col-sm-6 col-xs-12">
+            <div ng-if="game.isUpcoming" class="panel-heading">
+               <strong>{{game.startTime}}</strong>
             </div>
-            <div ng-if="game.isLive"class="panel-heading">
-               LIVE
+            <div ng-if="game.isLive" class="panel-heading">
+               <strong>LIVE</strong>
+               <div class="live-pulse"></div>
+               <div class="current-game-time"><strong>{{game.currentGameTime}}</strong></div>
             </div>
-            <div ng-if="game.isFinal"class="panel-heading">
-               FINAL
+            <div ng-if="game.isFinal" class="panel-heading final-text">
+               <strong>FINAL</strong>
             </div>
             <div class="panel-body">
-               <div class="row">
-                  <div ng-class="game.currentGameTime ?  'col-xs-5' : 'col-xs-6'" style="background-color: {{game.awayTeam.color}}">
+               <div class="row game-container">
+                  <div class="col-xs-6 team-background" style="background-color: {{game.awayTeam.color}}; background-image: url(http://i.turner.ncaa.com{{game.awayTeam.icon}});">
                      <div class="row">
                         <div class="team-name col-xs-8">{{game.awayTeam.name}}</div>
-                        <div class="score col-xs-4">{{game.awayTeam.score}}</div>
+                        <div class="team-score col-xs-4">{{game.awayTeam.score}}</div>
                      </div>
                   </div>
-                  <div ng-if="game.currentGameTime" class="col-xs-2" style="background: -moz-linear-gradient(left, {{game.awayTeam.color}} 0%, {{game.awayTeam.color}} 50%, {{game.homeTeam.color}} 50%, {{game.homeTeam.color}} 50%, {{game.homeTeam.color}} 100%);background: -webkit-linear-gradient(left, {{game.awayTeam.color}} 0%,{{game.awayTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 100%);background: linear-gradient(to right, {{game.awayTeam.color}} 0%,{{game.awayTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 50%,{{game.homeTeam.color}} 100%);">
-                      <div class="time-left">{{game.currentGameTime}}</div>
+                  <div  class="middle-game-info">
+                     <div ng-if="game.isUpcoming || game.isFinal" class="at-sign">@</div>
                   </div>
-                  <div ng-class="game.currentGameTime ?  'col-xs-5' : 'col-xs-6'" style="background-color: {{game.homeTeam.color}}">
+                  <div class="col-xs-6 team-background" style="background-color: {{game.homeTeam.color}}; background-image: url(http://i.turner.ncaa.com{{game.homeTeam.icon}});">
                      <div class="row">
-                        <div class="score col-xs-4">{{game.homeTeam.score}}</div>
+                        <div class="team-score col-xs-4">{{game.homeTeam.score}}</div>
                         <div class="team-name col-xs-8">{{game.homeTeam.name}}</div>
                      </div>
                   </div>
                </div>
             </div>
+         </div>
          </div>
       </div>
    </div>
@@ -71,7 +75,8 @@
             getGameData : function() {
                return $http({
                   method: 'GET',
-                  url: '/getgames'
+                  url: '/getgames',
+                  cache: false
                }).then(function successCallback(response) {
                   return response.data;
                }, function errorCallback(response) {
@@ -80,20 +85,25 @@
             }
          }
       })
-      .controller('ListController', function($scope, gameFactory) {
+      .controller('ListController', function($scope, gameFactory, $interval) {
+         $scope.gameStateFilter = {};
+
+         $scope.toggleFilter = function(key) {
+            if (key in $scope.gameStateFilter) {
+               delete $scope.gameStateFilter[key]
+            }
+            else {
+               $scope.gameStateFilter = {};
+               $scope.gameStateFilter[key] = true;
+            }
+         };
+         // $interval(function () {
+         //    gameFactory.getGameData().then( function(response) {
+         //       $scope.games = response;
+         //    });
+         // }, 20000);
+
          gameFactory.getGameData().then( function(response) {
-            $scope.gameStateFilter = {};
-
-            $scope.toggleFilter = function(key) {
-               if (key in $scope.gameStateFilter) {
-                  delete $scope.gameStateFilter[key]
-               }
-               else {
-                  $scope.gameStateFilter = {};
-                  $scope.gameStateFilter[key] = true;
-               }
-            };
-
             $scope.games = response;
          });
       });
@@ -104,21 +114,43 @@
 <style>
 body { padding-top: 70px; }
 .panel {
-   min-width: 60%;
+   padding: 0;
+   margin: 15px;
+   width: calc(50% - 30px);
+   float: left;
+}
+@media( max-width: 768px ) {
+   .panel {
+      padding: 0;
+      margin: 15px;
+      width: calc(100% - 30px);
+      float: left;
+   }
 }
 .panel-body {
    padding-bottom: 0;
    padding-top: 0;
    width: 100%;
 }
+.panel-body .game-container {
+   position: relative;
+}
+.panel-body .game-container .middle-game-info {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   z-index: 1;
+}
 .team-name,
 .time-left,
-.score {
+.team-score,
+.at-sign {
    height: 100px;
    color: #fff;
    font-family: 'Open Sans', sans-serif;
    font-weight: 600;
-   font-size: 30px;
+   font-size: 26px;
    text-align: center;
    display: flex;
    align-items: center;
@@ -127,11 +159,40 @@ body { padding-top: 70px; }
 .search-box {
    padding-top: 7px;
 }
-.time-left {
-   font-weight: 400;
-   font-size: 24px;
+.at-sign {
+   font-size: 32px;
 }
 .team-name {
    font-weight: 400;
 }
+.final-text {
+   font-weight: 600;
+}
+@-webkit-keyframes greenPulse {
+   from { background-color: #749a02; -webkit-box-shadow: 0 0 9px #333; }
+   50% { background-color: #91bd09; -webkit-box-shadow: 0 0 18px #91bd09; }
+   to { background-color: #749a02; -webkit-box-shadow: 0 0 9px #333; }
+}
+.live-pulse {
+   display: inline-block;
+   width: 10px;
+   height: 10px;
+   margin-left: 3px;
+   border-radius: 50%;
+   -webkit-animation-name: greenPulse;
+   -webkit-animation-duration: 2s;
+   -webkit-animation-iteration-count: infinite;
+}
+.current-game-time {
+   float: right;
+}
+.team-background  {
+   background-repeat: no-repeat;
+   background-size: 30%;
+   background-position: right center;
+}
+.team-background:first-of-type{
+   background-position: left center;
+}
+
 </style>
